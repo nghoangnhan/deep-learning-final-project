@@ -26,3 +26,30 @@ def load_datasets(folder_path, labels, fixed_size):
 
     print("Size of an image: {}", image_set[0].shape)
     return image_set, label_set
+
+class_labels = {
+    0: "astilbe",
+    1: "black_eyed_susan",
+    2: "bluebell",
+    3: "buttercup",
+    4: "calendula",
+    5: "carnation",
+    6: "colts_foot",
+    7: "cowslip",
+    8: "crocus",
+    9: "daffodil",
+    10: "daisy",
+    11: "dandelion",
+    12: "fritillary",
+    13: "iris",
+    14: "lily_valley",
+    15: "magnolia",
+    16: "pansy",
+    17: "rose",
+    18: "snowdrop",
+    19: "sunflower",
+    20: "tigerlily",
+    21: "tulip",
+    22: "water_lily",
+    23: "windflower"
+};

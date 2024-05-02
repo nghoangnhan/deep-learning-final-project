@@ -96,7 +96,7 @@ history = model.fit(datagen.flow(trainDataGlobal, trainLabelsGlobal, batch_size=
                     epochs=n_epochs, 
                     validation_data=(testDataGlobal, testLabelsGlobal), 
                     callbacks=[early_stopper])
-model.save('D:/HK2-S4/Deep Learning/Final Project/deep-learning-final-project/models/pretrained_model.keras')
+model.save('models/pretrained_model.keras')
 history = history.history
 print(history["val_accuracy"][-1])
 
