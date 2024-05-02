@@ -63,18 +63,15 @@ datagen.fit(trainDataGlobal)
 # Code to load and preprocess the flower dataset goes here
 # Define the CNN architecture
 model = models.Sequential([
-    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+    layers.Conv2D(64, (3, 3), activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Conv2D(128, (3, 3), activation='relu'),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Conv2D(256, (3, 3), activation='relu'),
     layers.Flatten(),
     layers.Dense(300, activation='relu', kernel_initializer=keras.initializers.he_normal()),
-    layers.BatchNormalization(),
     layers.Dense(200, activation='relu', kernel_initializer=keras.initializers.he_normal()),
-    layers.BatchNormalization(),
     layers.Dense(100, activation='relu', kernel_initializer=keras.initializers.he_normal()),
-    layers.BatchNormalization(),
     layers.Dropout(0.5),
     layers.Dense(NUM_CLASSES, activation='softmax')
 ])
