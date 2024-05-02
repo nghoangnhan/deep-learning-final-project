@@ -1,11 +1,10 @@
 #%%
-import cv2, os
+import os
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import numpy as np
-from tensorflow.keras import layers, models, callbacks
+from tensorflow.keras import layers, models
 from tensorflow import keras
-from tensorflow.keras.initializers import he_normal
 import pandas as pd
 import matplotlib.pyplot as plt
 from utils import load_datasets
@@ -112,49 +111,4 @@ plt.xlabel('epoch')
 plt.xticks(np.arange(0, n_epochs + 1,5))
 plt.show()
 
-
-#%%
-# Evaluate the model
-test_path = "dataset/test"
-file1 = "dataset/test/1.jpg"
-file2 = "dataset/test/6.jpg"
-file3 = "dataset/test/9.jpg"
-file4 = "dataset/test/14.jpg"
-
-# read the image and resize it to a fixed-size
-image1 = cv2.imread(file1)    
-image1 = cv2.resize(image1, fixed_size)
-
-# read the image and resize it to a fixed-size
-image2 = cv2.imread(file2)    
-image2 = cv2.resize(image2, fixed_size)
-
-image3 = cv2.imread(file3)    
-image3 = cv2.resize(image3, fixed_size)
-
-# read the image and resize it to a fixed-size
-image4 = cv2.imread(file4)    
-image4 = cv2.resize(image4, fixed_size)
-
-test_images = []
-test_labels = []
-
-test_images.append(image1);
-test_images.append(image2);
-test_images.append(image3);
-test_images.append(image4);
-test_labels.append(1);
-test_labels.append(6);
-test_labels.append(9);
-test_labels.append(14);
-
-test_images = np.array(test_images)
-test_labels = np.array(test_labels)
-
-X_new = test_images[0:4]
-y_proba = model.predict(X_new).round(2) # return probabilities (output of output neurons)
-print('Prediction proba: \n', y_proba)
-y_pred = np.argmax(model.predict(X_new), axis=1) # return class with highest proba
-print('Predicted class: ', y_pred)
-print('True labels: ', test_labels[0:4])
 # %%
