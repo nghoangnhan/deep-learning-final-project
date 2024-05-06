@@ -8,7 +8,11 @@ from tensorflow import keras
 import pandas as pd
 import matplotlib.pyplot as plt
 from utils import load_datasets
+from tensorflow.keras import regularizers
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.applications import VGG16
 
+#%%
 # Gloval variables
 IMG_HEIGHT       = 28
 IMG_WIDTH        = 28
@@ -24,7 +28,7 @@ h5_labels        = 'output/labels.h5'
 test_size = 0.10
 seed      = 42
 
-initial_learning_rate = 0.001
+initial_learning_rate = 0.0001
 batch_size = 32
 n_epochs = 100
 
@@ -63,31 +67,40 @@ datagen.fit(trainDataGlobal)
 # Code to load and preprocess the flower dataset goes here
 # Define the CNN architecture
 model = models.Sequential([
-    layers.Conv2D(64, (3, 3), activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+    layers.Conv2D(64, (3, 3), activation='relu', kernel_regularizer=regularizers.l2(0.0001), input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+    BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.Dropout(0.2),
+    layers.Conv2D(128, (3, 3), activation='relu', kernel_regularizer=regularizers.l2(0.0001)),
+    BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(256, (3, 3), activation='relu'),
+    layers.Dropout(0.3),
+    layers.Conv2D(256, (3, 3), activation='relu', kernel_regularizer=regularizers.l2(0.0001)),
+    BatchNormalization(),
+    layers.MaxPooling2D((2, 2)),
+    layers.Dropout(0.4),
     layers.Flatten(),
-    layers.Dense(300, activation='relu', kernel_initializer=keras.initializers.he_normal()),
-    layers.Dense(200, activation='relu', kernel_initializer=keras.initializers.he_normal()),
-    layers.Dense(100, activation='relu', kernel_initializer=keras.initializers.he_normal()),
+    layers.Dense(512, activation='relu', kernel_regularizer=regularizers.l2(0.001)),
     layers.Dropout(0.5),
     layers.Dense(NUM_CLASSES, activation='softmax')
 ])
 model.summary()
-early_stopper = keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=20)
+early_stopper = keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=30)
 
    
-lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    initial_learning_rate=initial_learning_rate,
-    decay_steps=20,
-    decay_rate=0.98,
-    staircase=True)
+# lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+#     initial_learning_rate=initial_learning_rate,
+#     decay_steps=20,
+#     decay_rate=0.98,
+#     staircase=True)
+lr_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
+    boundaries=[10, 20],
+    values=[0.01, 0.005, 0.001],
+)
 
 
 # Compile the model
-model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr_schedule),
+model.compile(optimizer=tf.keras.optimizers.RMSprop(learning_rate=lr_schedule),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
@@ -107,5 +120,7 @@ plt.ylim(0, 1)
 plt.xlabel('epoch')
 plt.xticks(np.arange(0, n_epochs + 1,5))
 plt.show()
+
+
 
 # %%
