@@ -1,22 +1,17 @@
-#%%
-from scipy.ndimage import convolve
+#%% Import common settings
 import tkinter as tk
 from PIL import Image
-from PIL import ImageDraw, ImageTk
-from tkinter import ttk
 from PIL import ImageTk
 from tkinter import filedialog
-from ttkthemes import ThemedStyle
 import cv2
 import numpy as np
-import tkinter.filedialog
 import tkinter
 import tkinter.messagebox
 import customtkinter
 from tensorflow import keras
 from utils import class_labels
 
-
+# Create UI
 customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -31,7 +26,7 @@ class App(customtkinter.CTk):
         super().__init__()
 
         # configure window
-        self.title("FinalProject.py")
+        self.title("Flower prediction")
         self.geometry(f"{1280}x{720}") 
 
         self.logo_image = customtkinter.CTkImage(Image.open("images/iconshow.png"))
@@ -39,25 +34,12 @@ class App(customtkinter.CTk):
         
         self.model = keras.models.load_model("models/pretrained_model.keras")
 
-        # Đọc hình ảnh từ file
-        # image = Image.open("image/save1.png")
-        # export_img=Image.open("image/export.png")
-        # draw_img=Image.open("image/draw.png")
         open_img=Image.open("images/open.png")
-        # reset_img=Image.open("image/reset.png")
-        # avatar_img=Image.open("image/iconshow1.png")
-        
+
         # Chuyển đổi hình ảnh thành đối tượng PhotoImage
-        
-        # photo1 = ImageTk.PhotoImage(image)
-        # export=ImageTk.PhotoImage(export_img)
         open=ImageTk.PhotoImage(open_img)
-        # reset=ImageTk.PhotoImage(reset_img)
-        # draw=ImageTk.PhotoImage(draw_img)
-        # avatar=ImageTk.PhotoImage(avatar_img)
 
         self.info_frame=customtkinter.CTkFrame(self,fg_color="transparent")
-
         self.info_frame.grid(row=3,column=3,padx=20,pady=(10,10))
 
         # Banner
@@ -91,7 +73,7 @@ class App(customtkinter.CTk):
         self.sidebar_button_open_image.grid(row=1, column=0, padx=20, pady=10)
 
         
-        self.sidebar_button_predict = customtkinter.CTkButton(self.sidebar_frame, text="Predict",command=self.handle_predict,text_color	 ="white")
+        self.sidebar_button_predict = customtkinter.CTkButton(self.sidebar_frame, text="Predict",command=self.predict,text_color	 ="white")
         self.sidebar_button_predict.grid(row=2, column=0, padx=20, pady=10)
 
 
@@ -123,9 +105,6 @@ class App(customtkinter.CTk):
         
         self.handle_img_frame.grid(row=0,column=3,padx=20,pady=(10,10))
     
-    def handle_predict(self):
-        self.predict() 
-
     # Resize Image 
     def resize_image(self,img, width, height):
         if img is None:
@@ -193,7 +172,7 @@ class App(customtkinter.CTk):
 
         predicted_labels = [class_labels[idx] for idx in y_pred]
 
-        # Convert the image from BGR to RGB (for displaying with matplotlib)
+        # Convert the image from BGR to RGB (for displaying with matplotlib)A
         image_with_text = cv2.cvtColor(self.temp_image, cv2.COLOR_RGB2BGR)
         
         # Define the class label text and position

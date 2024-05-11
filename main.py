@@ -1,4 +1,4 @@
-#%%
+#%% Import common settings
 import os
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
@@ -10,10 +10,9 @@ import matplotlib.pyplot as plt
 from utils import load_datasets
 from tensorflow.keras import regularizers
 from tensorflow.keras.layers import BatchNormalization
-from tensorflow.keras.applications import VGG16
 
 #%%
-# Gloval variables
+# Global variables
 IMG_HEIGHT       = 28
 IMG_WIDTH        = 28
 NUM_CLASSES      = 24
@@ -22,13 +21,10 @@ images_per_class = 80
 fixed_size       = tuple((IMG_HEIGHT, IMG_WIDTH))
 train_path       = "dataset/train"
 test_path        = "dataset/test"
-h5_data          = 'output/data.h5'
-h5_labels        = 'output/labels.h5'
 
 test_size = 0.10
 seed      = 42
 
-initial_learning_rate = 0.0001
 batch_size = 32
 n_epochs = 100
 
@@ -43,15 +39,14 @@ images, labels = load_datasets(train_path, train_labels, fixed_size)
 
 global_features = np.array(images)
 global_labels   = np.array(labels)
-(trainDataGlobal, testDataGlobal, trainLabelsGlobal, testLabelsGlobal) = train_test_split(np.array(global_features),
-                                                                                        np.array(global_labels),
+(trainDataGlobal, valDataGlobal, trainLabelsGlobal, valLabelsGlobal) = train_test_split(global_features,
+                                                                                        global_labels,
                                                                                         test_size=test_size,
                                                                                         random_state=seed)
 
 #%% Create Model and Training data
 # Load and preprocess the dataset
 # Code to load and preprocess the flower dataset goes here
-# Define the CNN architecture
 datagen = keras.preprocessing.image.ImageDataGenerator(
     rotation_range=20,
     width_shift_range=0.1,
@@ -63,8 +58,6 @@ datagen = keras.preprocessing.image.ImageDataGenerator(
 )
 datagen.fit(trainDataGlobal)
 
-# Load and preprocess the dataset
-# Code to load and preprocess the flower dataset goes here
 # Define the CNN architecture
 model = models.Sequential([
     layers.Conv2D(64, (3, 3), activation='relu', kernel_regularizer=regularizers.l2(0.0001), input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
@@ -85,14 +78,8 @@ model = models.Sequential([
     layers.Dense(NUM_CLASSES, activation='softmax')
 ])
 model.summary()
-early_stopper = keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=30)
 
-   
-# lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-#     initial_learning_rate=initial_learning_rate,
-#     decay_steps=20,
-#     decay_rate=0.98,
-#     staircase=True)
+early_stopper = keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=30)   
 lr_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
     boundaries=[10, 20],
     values=[0.01, 0.005, 0.001],
@@ -100,19 +87,21 @@ lr_schedule = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
 
 
 # Compile the model
-model.compile(optimizer=tf.keras.optimizers.RMSprop(learning_rate=lr_schedule),
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
 # Train the model
 history = model.fit(datagen.flow(trainDataGlobal, trainLabelsGlobal, batch_size=batch_size),
                     epochs=n_epochs, 
-                    validation_data=(testDataGlobal, testLabelsGlobal), 
+                    validation_data=(valDataGlobal, valLabelsGlobal), 
                     callbacks=[early_stopper])
 model.save('models/pretrained_model.keras')
 history = history.history
 print(history["val_accuracy"][-1])
 
+#%% Plot the graph
+# Accuracy graph
 pd.DataFrame({'Training acc':history['accuracy'],'Validation acc':history['val_accuracy']}).plot(figsize=(8, 5))
 plt.grid(True)
 plt.xlim(0, n_epochs)
@@ -121,6 +110,13 @@ plt.xlabel('epoch')
 plt.xticks(np.arange(0, n_epochs + 1,5))
 plt.show()
 
+# Loss graph
+pd.DataFrame({'Training loss':history['loss'],'Validation loss':history['val_loss']}).plot(figsize=(8, 5))
+plt.grid(True)
+plt.xlim(0, n_epochs)
+plt.xlabel('epoch')
+plt.xticks(np.arange(0, n_epochs + 1,5))
+plt.show()
 
 
 # %%
